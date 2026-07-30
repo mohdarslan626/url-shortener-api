@@ -1,64 +1,79 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from django.db.models import Q
+from django.http import HttpResponse, HttpResponseGone
+from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+
 from rest_framework import status
-from django.shortcuts import redirect
-from django.http import HttpResponse
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import ShortURL
-from .serializers import ShortURLSerializer 
+from .serializers import ShortURLSerializer
+
 
 class CreateShortURL(APIView):
 
     def post(self, request):
 
         serializer = ShortURLSerializer(data=request.data)
+
         if serializer.is_valid():
-            
+
             url = serializer.save()
+
+            code = url.custom_alias or url.short_code
 
             return Response(
                 {
                     "message": "URL shortened successfully",
-                    "short_code": url.short_code,
-                    "short_url": f"http://localhost:8000/{url.short_code}"
+                    "short_code": code,
+                    "short_url": request.build_absolute_uri(f"/{code}"),
+                    "data": ShortURLSerializer(url).data,
                 },
-                status=status.HTTP_201_CREATED
+                status=status.HTTP_201_CREATED,
             )
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 def redirect_url(request, code):
-    try:
-        url = ShortURL.objects.get(short_code=code)
 
-        url.clicks += 1
-        url.save()
+    url = get_object_or_404(
+        ShortURL,
+        Q(short_code=code) | Q(custom_alias=code),
+    )
 
-        return redirect(url.original_url)
-    
-    except ShortURL.DoesNotExist:
-        return HttpResponse(
-            "URL not found",
-            status=status.HTTP_404_NOT_FOUND
-            )  
+    if not url.is_active:
+        return HttpResponseGone("This URL has been disabled.")
+
+    if url.expires_at and url.expires_at <= timezone.now():
+        return HttpResponseGone("This URL has expired.")
+
+    url.clicks += 1
+    url.save(update_fields=["clicks"])
+
+    return redirect(url.original_url)
 
 
 class AnalyticsView(APIView):
 
     def get(self, request, code):
 
-        try:
-            url = ShortURL.objects.get(short_code=code)
+        url = get_object_or_404(
+            ShortURL,
+            Q(short_code=code) | Q(custom_alias=code),
+        )
 
-            return Response({
+        return Response(
+            {
                 "original_url": url.original_url,
                 "short_code": url.short_code,
+                "custom_alias": url.custom_alias,
                 "clicks": url.clicks,
-                "created_at": url.created_at
-            })
-        
-        except ShortURL.DoesNotExist:
-            return Response(
-                {"error": "URL not found"},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
+                "is_active": url.is_active,
+                "expires_at": url.expires_at,
+                "created_at": url.created_at,
+                "updated_at": url.updated_at,
+            }
+        )
+    
