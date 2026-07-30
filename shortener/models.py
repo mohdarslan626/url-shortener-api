@@ -1,7 +1,7 @@
 from django.db import models
 import string
 import random
-
+from django.conf import settings
 from django.core.files import File
 from io import BytesIO
 import qrcode
@@ -19,6 +19,14 @@ def generate_code(length=6):
 
 class ShortURL(models.Model):
     original_url = models.URLField()
+
+    owner = models.ForeignKey(
+    settings.AUTH_USER_MODEL,
+    on_delete=models.CASCADE,
+    related_name="short_urls",
+    null=True,
+    blank=True,
+    )
 
     short_code = models.CharField(
         max_length=20,

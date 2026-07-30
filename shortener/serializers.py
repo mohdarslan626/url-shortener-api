@@ -28,6 +28,7 @@ class ShortURLSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             "id",
+            "owner",
             "short_code",
             "clicks",
             "created_at",

@@ -6,7 +6,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework.permissions import IsAuthenticated
 from .models import ShortURL
 from .serializers import ShortURLSerializer
 
@@ -19,7 +19,10 @@ class CreateShortURL(APIView):
 
         if serializer.is_valid():
 
-            url = serializer.save()
+            if request.user.is_authenticated:
+                url = serializer.save(owner=request.user)
+            else:
+                url = serializer.save()
 
             code = url.custom_alias or url.short_code
 
@@ -86,4 +89,21 @@ class AnalyticsView(APIView):
                 "updated_at": url.updated_at,
             }
         )
-    
+ 
+class MyURLsView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        urls = ShortURL.objects.filter(
+            owner=request.user
+        ).order_by("-created_at")
+
+        serializer = ShortURLSerializer(
+            urls,
+            many=True,
+        )
+
+        return Response(serializer.data)
+       
