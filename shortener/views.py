@@ -23,11 +23,21 @@ class CreateShortURL(APIView):
 
             code = url.custom_alias or url.short_code
 
+            short_url = request.build_absolute_uri(f"/{code}")
+
+            url.generate_qr_code(short_url)
+            url.save()
+
             return Response(
                 {
                     "message": "URL shortened successfully",
                     "short_code": code,
-                    "short_url": request.build_absolute_uri(f"/{code}"),
+                    "short_url": short_url,
+                    "qr_code": (
+                        request.build_absolute_uri(url.qr_code.url)
+                        if url.qr_code
+                        else None
+                    ),
                     "data": ShortURLSerializer(url).data,
                 },
                 status=status.HTTP_201_CREATED,

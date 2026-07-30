@@ -2,6 +2,10 @@ from django.db import models
 import string
 import random
 
+from django.core.files import File
+from io import BytesIO
+import qrcode
+
 
 def generate_code(length=6):
     chars = string.ascii_letters + string.digits
@@ -30,6 +34,12 @@ class ShortURL(models.Model):
         null=True,
     )
 
+    qr_code = models.ImageField(
+    upload_to="qr_codes/",
+    blank=True,
+    null=True,
+    )
+
     clicks = models.PositiveBigIntegerField(default=0)
 
     expires_at = models.DateTimeField(
@@ -46,3 +56,19 @@ class ShortURL(models.Model):
     def __str__(self):
         return self.custom_alias or self.short_code
     
+    def generate_qr_code(self, url):
+
+        qr = qrcode.make(url)
+
+        buffer = BytesIO()
+
+        qr.save(buffer, format="PNG")
+
+        filename = f"{self.custom_alias or self.short_code}.png"
+
+        self.qr_code.save(
+            filename,
+            File(buffer),
+            save=False,
+        )
+        
