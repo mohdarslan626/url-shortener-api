@@ -3,21 +3,46 @@ import string
 import random
 
 
-def generate_code():
+def generate_code(length=6):
     chars = string.ascii_letters + string.digits
-    return ''.join(random.choices(chars, k=6))
+
+    while True:
+        code = "".join(random.choices(chars, k=length))
+
+        if not ShortURL.objects.filter(short_code=code).exists():
+            return code
 
 
 class ShortURL(models.Model):
     original_url = models.URLField()
+
     short_code = models.CharField(
-        max_length=10,
+        max_length=20,
         unique=True,
-        default=generate_code
+        default=generate_code,
+        db_index=True,
     )
+
+    custom_alias = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=True,
+        null=True,
+    )
+
     clicks = models.PositiveBigIntegerField(default=0)
+
+    expires_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    is_active = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.short_code
+        return self.custom_alias or self.short_code
+    
