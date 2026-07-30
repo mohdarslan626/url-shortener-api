@@ -31,6 +31,11 @@ urlpatterns = [
         redirect_url,
         name='redirect-url'
     ),
+
+    path(
+    "api/auth/",
+    include("accounts.urls"),
+    ),
 ]
 
 if settings.DEBUG:
