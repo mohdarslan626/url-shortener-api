@@ -1,0 +1,39 @@
+@baseUrl = http://127.0.0.1:8000
+@token = 
+
+### Register
+
+POST {{baseUrl}}/api/auth/register/
+Content-Type: application/json
+
+{
+    "username": "",
+    "email": "",
+    "password": ""
+}
+
+### Login
+
+POST {{baseUrl}}/api/auth/login/
+Content-Type: application/json
+
+{
+    "username": "",
+    "password": ""
+}
+
+### Create URL
+
+POST {{baseUrl}}/api/shorten/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "original_url":"https://github.com",
+    "custom_alias": "arslan-github"
+}
+
+### My URLs
+
+GET {{baseUrl}}/api/my-urls/
+Authorization: Bearer {{token}}
