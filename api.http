@@ -1,6 +1,6 @@
 @baseUrl = http://127.0.0.1:8000
 @token = 
-@url_id = 
+@url_id = 1
 
 ### Register
 
@@ -31,7 +31,7 @@ Authorization: Bearer {{token}}
 
 {
     "original_url":"https://github.com",
-    "custom_alias": "gitty"
+    "custom_alias": "Git"
 }
 
 ### My URLs
