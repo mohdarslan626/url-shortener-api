@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.http import HttpResponse, HttpResponseGone
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
@@ -161,4 +161,67 @@ class DeleteShortURL(APIView):
         url.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DashboardView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        urls = ShortURL.objects.filter(owner=request.user)
+
+        total_urls = urls.count()
+
+        active_urls = urls.filter(is_active=True).count()
+
+        expired_urls = urls.filter(
+            expires_at__lt=timezone.now()
+        ).count()
+
+        total_clicks = (
+            urls.aggregate(
+                total=Sum("clicks")
+            )["total"] or 0
+        )
+
+        most_clicked = (
+            urls.order_by("-clicks")
+            .first()
+        )
+
+        latest = (
+            urls.order_by("-created_at")
+            .first()
+        )
+
+        return Response(
+            {
+                "total_urls": total_urls,
+                "active_urls": active_urls,
+                "expired_urls": expired_urls,
+                "total_clicks": total_clicks,
+
+                "most_clicked_url": (
+                    {
+                        "id": most_clicked.id,
+                        "short_code": most_clicked.custom_alias
+                        or most_clicked.short_code,
+                        "clicks": most_clicked.clicks,
+                    }
+                    if most_clicked
+                    else None
+                ),
+
+                "latest_url": (
+                    {
+                        "id": latest.id,
+                        "short_code": latest.custom_alias
+                        or latest.short_code,
+                    }
+                    if latest
+                    else None
+                ),
+            }
+        )
     

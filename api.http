@@ -54,3 +54,8 @@ Authorization: Bearer {{token}}
 
 DELETE {{baseUrl}}/api/urls/{{url_id}}/delete/
 Authorization: Bearer {{token}}
+
+### Dashboard
+
+GET {{baseUrl}}/api/dashboard/
+Authorization: Bearer {{token}}

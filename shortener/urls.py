@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreateShortURL, AnalyticsView, MyURLsView, UpdateShortURL, DeleteShortURL
+from .views import CreateShortURL, AnalyticsView, MyURLsView, UpdateShortURL, DeleteShortURL, DashboardView
 
 urlpatterns = [
     path(
@@ -30,5 +30,11 @@ urlpatterns = [
     "urls/<int:pk>/delete/",
     DeleteShortURL.as_view(),
     name="delete-url",
+    ),
+
+    path(
+    "dashboard/",
+    DashboardView.as_view(),
+    name="dashboard",
     ),
 ]
