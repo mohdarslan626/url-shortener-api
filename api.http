@@ -49,3 +49,8 @@ Authorization: Bearer {{token}}
     "original_url": "https://github.com/updated",
     "custom_alias": "arslan-git"
 }
+
+### Delete URL
+
+DELETE {{baseUrl}}/api/urls/{{url_id}}/delete/
+Authorization: Bearer {{token}}

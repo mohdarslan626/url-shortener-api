@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreateShortURL, AnalyticsView, MyURLsView, UpdateShortURL
+from .views import CreateShortURL, AnalyticsView, MyURLsView, UpdateShortURL, DeleteShortURL
 
 urlpatterns = [
     path(
@@ -24,5 +24,11 @@ urlpatterns = [
     "urls/<int:pk>/",
     UpdateShortURL.as_view(),
     name="update-url",
+    ),
+
+    path(
+    "urls/<int:pk>/delete/",
+    DeleteShortURL.as_view(),
+    name="delete-url",
     ),
 ]

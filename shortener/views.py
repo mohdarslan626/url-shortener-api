@@ -140,4 +140,30 @@ class UpdateShortURL(APIView):
             return [IsAuthenticated(), IsOwner()]
 
         return super().get_permissions()
+
+
+class DeleteShortURL(APIView):
+
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    def delete(self, request, pk):
+
+        url = get_object_or_404(
+            ShortURL,
+            pk=pk,
+        )
+
+        self.check_object_permissions(
+            request,
+            url,
+        )
+
+        url.delete()
+
+        return Response(
+            {
+                "message": "URL deleted successfully."
+            },
+            status=status.HTTP_200_OK,
+        )
     
