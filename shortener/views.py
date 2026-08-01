@@ -9,7 +9,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from .models import ShortURL
 from .serializers import ShortURLSerializer
-
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsOwner
 
 class CreateShortURL(APIView):
 
@@ -106,4 +107,37 @@ class MyURLsView(APIView):
         )
 
         return Response(serializer.data)
-       
+
+
+class UpdateShortURL(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+
+        url = get_object_or_404(
+            ShortURL,
+            pk=pk,
+        )
+
+        self.check_object_permissions(request, url)
+
+        serializer = ShortURLSerializer(
+            url,
+            data=request.data,
+            partial=True,
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save()
+
+        return Response(serializer.data)
+
+    def get_permissions(self):
+
+        if self.request.method == "PATCH":
+            return [IsAuthenticated(), IsOwner()]
+
+        return super().get_permissions()
+    

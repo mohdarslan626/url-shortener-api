@@ -1,5 +1,6 @@
 @baseUrl = http://127.0.0.1:8000
 @token = 
+@url_id = 
 
 ### Register
 
@@ -7,9 +8,9 @@ POST {{baseUrl}}/api/auth/register/
 Content-Type: application/json
 
 {
-    "username": "",
-    "email": "",
-    "password": ""
+    "username": "test1",
+    "email": "test1@example.com",
+    "password": "password123"
 }
 
 ### Login
@@ -18,8 +19,8 @@ POST {{baseUrl}}/api/auth/login/
 Content-Type: application/json
 
 {
-    "username": "",
-    "password": ""
+    "username": "test1",
+    "password": "password123"
 }
 
 ### Create URL
@@ -30,10 +31,21 @@ Authorization: Bearer {{token}}
 
 {
     "original_url":"https://github.com",
-    "custom_alias": "arslan-github"
+    "custom_alias": "gitty"
 }
 
 ### My URLs
 
 GET {{baseUrl}}/api/my-urls/
 Authorization: Bearer {{token}}
+
+### Update URL
+
+PATCH {{baseUrl}}/api/urls/{{url_id}}/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "original_url": "https://github.com/updated",
+    "custom_alias": "arslan-git"
+}
