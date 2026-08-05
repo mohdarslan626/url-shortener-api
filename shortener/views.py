@@ -173,7 +173,8 @@ class DashboardView(APIView):
 
         total_urls = urls.count()
 
-        active_urls = urls.filter(is_active=True).count()
+        active_urls = urls.filter(Q(expires_at__isnull=True) | 
+                                  Q(expires_at__gt=timezone.now())).count()
 
         expired_urls = urls.filter(
             expires_at__lt=timezone.now()
@@ -190,17 +191,18 @@ class DashboardView(APIView):
             .first()
         )
 
-        latest = (
-            urls.order_by("-created_at")
-            .first()
+        recent_urls = (
+            urls.order_by("-created_at")[:5]
         )
 
         return Response(
-            {
-                "total_urls": total_urls,
-                "active_urls": active_urls,
-                "expired_urls": expired_urls,
-                "total_clicks": total_clicks,
+            { 
+                "summary": {
+                    "total_urls": total_urls,
+                    "active_urls": active_urls,
+                    "expired_urls": expired_urls,
+                    "total_clicks": total_clicks,
+                },
 
                 "most_clicked_url": (
                     {
@@ -213,15 +215,16 @@ class DashboardView(APIView):
                     else None
                 ),
 
-                "latest_url": (
+                "recent_urls": [
                     {
-                        "id": latest.id,
-                        "short_code": latest.custom_alias
-                        or latest.short_code,
+                        "id": url.id,
+                        "short_code": url.custom_alias or url.short_code,
+                        "original_url": url.original_url,
+                        "clicks": url.clicks,
+                        "created_at": url.created_at,
                     }
-                    if latest
-                    else None
-                ),
+                    for url in recent_urls
+                ],
             }
         )
     
