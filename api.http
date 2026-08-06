@@ -30,8 +30,8 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "original_url":"https://github.com",
-    "custom_alias": "Git"
+    "original_url":"https://google.com",
+    "custom_alias": "Googly"
 }
 
 ### My URLs

@@ -1,16 +1,24 @@
-from django.db.models import Q, Sum
-from django.http import HttpResponse, HttpResponseGone
+# Django
+from django.db.models import Q
+from django.http import HttpResponseGone
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
-from .pagination import ShortURLPagination
-from rest_framework import status, generics
+
+# Django REST Framework
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+
+# Local imports
 from .models import ShortURL
-from .serializers import ShortURLSerializer
-from rest_framework.permissions import IsAuthenticated
+from .pagination import ShortURLPagination
 from .permissions import IsOwner
+from .serializers import ShortURLSerializer
+
+# API modules
+from .api.dashboard import DashboardView
+
 
 class CreateShortURL(APIView):
 
@@ -26,7 +34,6 @@ class CreateShortURL(APIView):
                 url = serializer.save()
 
             code = url.custom_alias or url.short_code
-
             short_url = request.build_absolute_uri(f"/{code}")
 
             url.generate_qr_code(short_url)
@@ -90,7 +97,8 @@ class AnalyticsView(APIView):
                 "updated_at": url.updated_at,
             }
         )
- 
+
+
 class MyURLsView(generics.ListAPIView):
 
     serializer_class = ShortURLSerializer
@@ -111,7 +119,6 @@ class MyURLsView(generics.ListAPIView):
     ordering = ("-created_at",)
 
     def get_queryset(self):
-
         return (
             ShortURL.objects
             .filter(owner=self.request.user)
@@ -163,78 +170,10 @@ class DeleteShortURL(APIView):
             pk=pk,
         )
 
-        self.check_object_permissions(
-            request,
-            url,
-        )
+        self.check_object_permissions(request, url)
 
         url.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class DashboardView(APIView):
-
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-
-        urls = ShortURL.objects.filter(owner=request.user)
-
-        total_urls = urls.count()
-
-        active_urls = urls.filter(Q(expires_at__isnull=True) | 
-                                  Q(expires_at__gt=timezone.now())).count()
-
-        expired_urls = urls.filter(
-            expires_at__lt=timezone.now()
-        ).count()
-
-        total_clicks = (
-            urls.aggregate(
-                total=Sum("clicks")
-            )["total"] or 0
-        )
-
-        most_clicked = (
-            urls.order_by("-clicks")
-            .first()
-        )
-
-        recent_urls = (
-            urls.order_by("-created_at")[:5]
-        )
-
-        return Response(
-            { 
-                "summary": {
-                    "total_urls": total_urls,
-                    "active_urls": active_urls,
-                    "expired_urls": expired_urls,
-                    "total_clicks": total_clicks,
-                },
-
-                "most_clicked_url": (
-                    {
-                        "id": most_clicked.id,
-                        "short_code": most_clicked.custom_alias
-                        or most_clicked.short_code,
-                        "clicks": most_clicked.clicks,
-                    }
-                    if most_clicked
-                    else None
-                ),
-
-                "recent_urls": [
-                    {
-                        "id": url.id,
-                        "short_code": url.custom_alias or url.short_code,
-                        "original_url": url.original_url,
-                        "clicks": url.clicks,
-                        "created_at": url.created_at,
-                    }
-                    for url in recent_urls
-                ],
-            }
-        )
+    
     
