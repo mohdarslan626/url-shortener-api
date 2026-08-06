@@ -2,8 +2,8 @@ from django.db.models import Q, Sum
 from django.http import HttpResponse, HttpResponseGone
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
-
-from rest_framework import status
+from .pagination import ShortURLPagination
+from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -91,22 +91,32 @@ class AnalyticsView(APIView):
             }
         )
  
-class MyURLsView(APIView):
+class MyURLsView(generics.ListAPIView):
 
+    serializer_class = ShortURLSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = ShortURLPagination
 
-    def get(self, request):
+    search_fields = (
+        "original_url",
+        "custom_alias",
+        "short_code",
+    )
 
-        urls = ShortURL.objects.filter(
-            owner=request.user
-        ).order_by("-created_at")
+    ordering_fields = (
+        "clicks",
+        "created_at",
+    )
 
-        serializer = ShortURLSerializer(
-            urls,
-            many=True,
+    ordering = ("-created_at",)
+
+    def get_queryset(self):
+
+        return (
+            ShortURL.objects
+            .filter(owner=self.request.user)
+            .order_by("-created_at")
         )
-
-        return Response(serializer.data)
 
 
 class UpdateShortURL(APIView):

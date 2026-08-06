@@ -1,6 +1,6 @@
 @baseUrl = http://127.0.0.1:8000
 @token = 
-@url_id = 1
+@url_id = 11
 
 ### Register
 
@@ -58,4 +58,12 @@ Authorization: Bearer {{token}}
 ### Dashboard
 
 GET {{baseUrl}}/api/dashboard/
+Authorization: Bearer {{token}}
+
+#### Search URLs    
+GET {{baseUrl}}/api/my-urls/?search=gitty
+Authorization: Bearer {{token}}
+
+#### page
+GET {{baseUrl}}/api/my-urls/?page_size=10
 Authorization: Bearer {{token}}
