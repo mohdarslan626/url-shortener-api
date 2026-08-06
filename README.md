@@ -4,14 +4,18 @@ A production-ready URL Shortener API built with **Django** and **Django REST Fra
 
 ## Features
 
-* 🔐 JWT Authentication (Register, Login, Refresh)
-* 🔗 Generate short URLs
-* ✏️ Custom URL aliases
-* ⏳ URL expiration support
-* 📱 QR code generation
-* 📊 Click analytics
-* 👤 User-specific URL management
-* 🚀 RESTful API built with Django REST Framework
+- JWT Authentication
+- User Registration & Login
+- URL Shortening
+- Custom Alias
+- URL Expiration
+- QR Code Generation
+- Click Analytics
+- User Dashboard
+- Search URLs
+- Ordering
+- Pagination
+- Object-Level Permissions
 
 ## Tech Stack
 
