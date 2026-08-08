@@ -23,23 +23,5 @@ from .api.analytics import AnalyticsView
 from .api.my_urls import MyURLsView
 from .api.create import CreateShortURL
 from .api.update import UpdateShortURL
-
-
-class DeleteShortURL(APIView):
-
-    permission_classes = [IsAuthenticated, IsOwner]
-
-    def delete(self, request, pk):
-
-        url = get_object_or_404(
-            ShortURL,
-            pk=pk,
-        )
-
-        self.check_object_permissions(request, url)
-
-        url.delete()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    
+from .api.delete import DeleteShortURL
     
