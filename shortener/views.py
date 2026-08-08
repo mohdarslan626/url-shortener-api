@@ -18,6 +18,7 @@ from .serializers import ShortURLSerializer
 
 # API modules
 from .api.dashboard import DashboardView
+from .api.redirect import redirect_url
 
 
 class CreateShortURL(APIView):
@@ -55,26 +56,8 @@ class CreateShortURL(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-def redirect_url(request, code):
-
-    url = get_object_or_404(
-        ShortURL,
-        Q(short_code=code) | Q(custom_alias=code),
-    )
-
-    if not url.is_active:
-        return HttpResponseGone("This URL has been disabled.")
-
-    if url.expires_at and url.expires_at <= timezone.now():
-        return HttpResponseGone("This URL has expired.")
-
-    url.clicks += 1
-    url.save(update_fields=["clicks"])
-
-    return redirect(url.original_url)
-
+    
+    
 
 class AnalyticsView(APIView):
 
