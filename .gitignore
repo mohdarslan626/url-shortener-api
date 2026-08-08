@@ -25,3 +25,7 @@ db.sqlite3
 # Migrations (optional)
 # */migrations/*
 # !*/migrations/__init__.py
+
+# Media files (optional)
+# media/        
+media/
