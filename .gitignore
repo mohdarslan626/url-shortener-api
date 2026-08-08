@@ -32,3 +32,4 @@ media/
 
 # htmlcov (coverage reports)
 htmlcov/
+.coverage
