@@ -19,6 +19,7 @@ from .serializers import ShortURLSerializer
 # API modules
 from .api.dashboard import DashboardView
 from .api.redirect import redirect_url
+from .api.analytics import AnalyticsView
 
 
 class CreateShortURL(APIView):
@@ -57,29 +58,6 @@ class CreateShortURL(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    
-
-class AnalyticsView(APIView):
-
-    def get(self, request, code):
-
-        url = get_object_or_404(
-            ShortURL,
-            Q(short_code=code) | Q(custom_alias=code),
-        )
-
-        return Response(
-            {
-                "original_url": url.original_url,
-                "short_code": url.short_code,
-                "custom_alias": url.custom_alias,
-                "clicks": url.clicks,
-                "is_active": url.is_active,
-                "expires_at": url.expires_at,
-                "created_at": url.created_at,
-                "updated_at": url.updated_at,
-            }
-        )
 
 
 class MyURLsView(generics.ListAPIView):

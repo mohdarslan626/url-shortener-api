@@ -1,6 +1,6 @@
 @baseUrl = http://127.0.0.1:8000
 @token = 
-@url_id = 11
+@url_id = 12
 
 ### Register
 
@@ -66,4 +66,12 @@ Authorization: Bearer {{token}}
 
 #### page
 GET {{baseUrl}}/api/my-urls/?page_size=10
+Authorization: Bearer {{token}}
+
+#### Analytics
+GET {{baseUrl}}/api/analytics/googly/
+Authorization: Bearer {{token}}
+
+#### Redirect URL
+GET {{baseUrl}}/api/redirect/google.com/
 Authorization: Bearer {{token}}
