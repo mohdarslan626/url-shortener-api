@@ -22,39 +22,7 @@ from .api.redirect import redirect_url
 from .api.analytics import AnalyticsView
 from .api.my_urls import MyURLsView
 from .api.create import CreateShortURL
-
-
-class UpdateShortURL(APIView):
-
-    permission_classes = [IsAuthenticated]
-
-    def patch(self, request, pk):
-
-        url = get_object_or_404(
-            ShortURL,
-            pk=pk,
-        )
-
-        self.check_object_permissions(request, url)
-
-        serializer = ShortURLSerializer(
-            url,
-            data=request.data,
-            partial=True,
-        )
-
-        serializer.is_valid(raise_exception=True)
-
-        serializer.save()
-
-        return Response(serializer.data)
-
-    def get_permissions(self):
-
-        if self.request.method == "PATCH":
-            return [IsAuthenticated(), IsOwner()]
-
-        return super().get_permissions()
+from .api.update import UpdateShortURL
 
 
 class DeleteShortURL(APIView):
