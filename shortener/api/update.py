@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-
+from drf_spectacular.utils import extend_schema
 from ..models import ShortURL
 from ..permissions import IsOwner
 from ..serializers import ShortURLSerializer
@@ -12,7 +12,10 @@ from ..serializers import ShortURLSerializer
 class UpdateShortURL(APIView):
 
     permission_classes = [IsAuthenticated]
-
+    @extend_schema(
+        request=ShortURLSerializer,
+        responses={200: ShortURLSerializer},
+    )
     def patch(self, request, pk):
 
         url = get_object_or_404(

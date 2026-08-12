@@ -2,10 +2,13 @@ from django.db.models import Q
 from django.http import HttpResponseGone
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
-
+from drf_spectacular.utils import extend_schema
 from ..models import ShortURL
 
 
+@extend_schema(
+    responses={302: None},
+)
 def redirect_url(request, code):
 
     url = get_object_or_404(

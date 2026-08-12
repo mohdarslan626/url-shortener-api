@@ -3,10 +3,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ..serializers import ShortURLSerializer
-
+from drf_spectacular.utils import extend_schema
 
 class CreateShortURL(APIView):
 
+    @extend_schema(
+        request=ShortURLSerializer,
+        responses={
+            201: ShortURLSerializer,
+            },
+    )
+    
     def post(self, request):
 
         serializer = ShortURLSerializer(data=request.data)

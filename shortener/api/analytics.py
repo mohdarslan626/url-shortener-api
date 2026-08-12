@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-
+from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -9,6 +9,9 @@ from ..models import ShortURL
 
 class AnalyticsView(APIView):
 
+    @extend_schema(
+    responses={200: dict},
+    )
     def get(self, request, code):
 
         url = get_object_or_404(

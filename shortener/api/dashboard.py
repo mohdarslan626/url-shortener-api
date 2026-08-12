@@ -4,7 +4,7 @@ from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-
+from drf_spectacular.utils import extend_schema
 from shortener.models import ShortURL
 
 
@@ -12,6 +12,9 @@ class DashboardView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        responses={200: dict},
+    )
     def get(self, request):
 
         urls = ShortURL.objects.filter(owner=request.user)
