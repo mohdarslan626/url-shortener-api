@@ -33,3 +33,6 @@ media/
 # htmlcov (coverage reports)
 htmlcov/
 .coverage
+
+# .env file for environment variables
+.env
