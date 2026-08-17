@@ -7,11 +7,14 @@ from drf_spectacular.utils import extend_schema
 from ..models import ShortURL
 from ..permissions import IsOwner
 from ..serializers import ShortURLSerializer
+from ..services.cache import RedisCacheService
+from ..services.cache_keys import my_urls_cache_pattern
 
 
 class UpdateShortURL(APIView):
 
     permission_classes = [IsAuthenticated]
+
     @extend_schema(
         request=ShortURLSerializer,
         responses={200: ShortURLSerializer},
@@ -34,6 +37,9 @@ class UpdateShortURL(APIView):
         serializer.is_valid(raise_exception=True)
 
         serializer.save()
+        cache = RedisCacheService()
+
+        cache.delete_pattern(my_urls_cache_pattern(url.owner_id))
 
         return Response(serializer.data)
 
@@ -43,4 +49,3 @@ class UpdateShortURL(APIView):
             return [IsAuthenticated(), IsOwner()]
 
         return super().get_permissions()
-    

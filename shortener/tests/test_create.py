@@ -4,7 +4,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.utils import timezone
 from shortener.models import ShortURL
-
+from shortener.services.cache import RedisCacheService
+from shortener.services.cache_keys import my_urls_cache_key
 
 User = get_user_model()
 
@@ -12,16 +13,20 @@ User = get_user_model()
 class CreateShortURLTests(APITestCase):
 
     def setUp(self):
+        self.cache = RedisCacheService()
+        self.cache.client.flushdb()
+
         self.user = User.objects.create_user(
             username="testuser",
             password="Password@123",
         )
 
-        self.client.force_authenticate(
-            user=self.user
-        )
+        self.client.force_authenticate(user=self.user)
 
         self.url = "/api/shorten/"
+
+    def tearDown(self):
+        self.cache.client.flushdb()
 
     def test_create_short_url(self):
 
@@ -57,6 +62,37 @@ class CreateShortURLTests(APITestCase):
             self.user,
         )
 
+    def test_create_short_url_invalidates_my_urls_cache(self):
+
+        cache_response = self.client.get("/api/my-urls/")
+
+        self.assertEqual(
+            cache_response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        cache_key = my_urls_cache_key(
+            self.user.id,
+            "",
+        )
+
+        self.assertIsNotNone(self.cache.get(cache_key))
+
+        response = self.client.post(
+            self.url,
+            {
+                "original_url": "https://www.python.org",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+        )
+
+        self.assertIsNone(self.cache.get(cache_key))
+
     def test_create_short_url_with_custom_alias(self):
 
         data = {
@@ -83,7 +119,7 @@ class CreateShortURLTests(APITestCase):
         )
 
     def test_create_short_url_with_duplicate_alias(self):
-        
+
         ShortURL.objects.create(
             original_url="https://github.com",
             custom_alias="github",
@@ -197,7 +233,7 @@ class CreateShortURLTests(APITestCase):
         )
 
     def test_create_short_url_without_authentication(self):
-        
+
         self.client.force_authenticate(user=None)
 
         data = {

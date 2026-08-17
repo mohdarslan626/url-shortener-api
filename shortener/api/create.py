@@ -4,6 +4,9 @@ from rest_framework.views import APIView
 
 from ..serializers import ShortURLSerializer
 from drf_spectacular.utils import extend_schema
+from ..services.cache import RedisCacheService
+from ..services.cache_keys import my_urls_cache_pattern
+
 
 class CreateShortURL(APIView):
 
@@ -11,9 +14,8 @@ class CreateShortURL(APIView):
         request=ShortURLSerializer,
         responses={
             201: ShortURLSerializer,
-            },
+        },
     )
-    
     def post(self, request):
 
         serializer = ShortURLSerializer(data=request.data)
@@ -22,6 +24,11 @@ class CreateShortURL(APIView):
 
             if request.user.is_authenticated:
                 url = serializer.save(owner=request.user)
+
+                cache = RedisCacheService()
+
+                cache.delete_pattern(my_urls_cache_pattern(request.user.id))
+
             else:
                 url = serializer.save()
 
@@ -50,4 +57,3 @@ class CreateShortURL(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST,
         )
-    

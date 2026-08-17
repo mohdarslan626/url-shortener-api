@@ -7,6 +7,8 @@ from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 from ..models import ShortURL
 from ..permissions import IsOwner
+from ..services.cache import RedisCacheService
+from ..services.cache_keys import my_urls_cache_pattern
 
 
 class DeleteShortURL(APIView):
@@ -28,9 +30,10 @@ class DeleteShortURL(APIView):
             url,
         )
 
+        owner_id = url.owner_id
         url.delete()
 
-        return Response(
-            status=status.HTTP_204_NO_CONTENT
-        )
-    
+        cache = RedisCacheService()
+        cache.delete_pattern(my_urls_cache_pattern(owner_id))
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
