@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import get_object_or_404
 
 from rest_framework import status
@@ -9,6 +10,8 @@ from ..models import ShortURL
 from ..permissions import IsOwner
 from ..services.cache import RedisCacheService
 from ..services.cache_keys import my_urls_cache_pattern
+
+logger = logging.getLogger(__name__)
 
 
 class DeleteShortURL(APIView):
@@ -35,5 +38,11 @@ class DeleteShortURL(APIView):
 
         cache = RedisCacheService()
         cache.delete_pattern(my_urls_cache_pattern(owner_id))
+
+        logger.info(
+            "Short URL deleted successfully: user_id=%s, url_id=%s",
+            request.user.id,
+            pk,
+        )
 
         return Response(status=status.HTTP_204_NO_CONTENT)

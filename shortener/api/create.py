@@ -1,11 +1,13 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+import logging
 from ..serializers import ShortURLSerializer
 from drf_spectacular.utils import extend_schema
 from ..services.cache import RedisCacheService
 from ..services.cache_keys import my_urls_cache_pattern
+
+logger = logging.getLogger(__name__)
 
 
 class CreateShortURL(APIView):
@@ -37,6 +39,12 @@ class CreateShortURL(APIView):
 
             url.generate_qr_code(short_url)
             url.save()
+
+            logger.info(
+                "Short URL created successfully: user_id=%s, short_code=%s",
+                request.user.id if request.user.is_authenticated else None,
+                code,
+            )
 
             return Response(
                 {

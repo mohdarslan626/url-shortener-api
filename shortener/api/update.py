@@ -1,3 +1,4 @@
+import logging
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,6 +10,8 @@ from ..permissions import IsOwner
 from ..serializers import ShortURLSerializer
 from ..services.cache import RedisCacheService
 from ..services.cache_keys import my_urls_cache_pattern
+
+logger = logging.getLogger(__name__)
 
 
 class UpdateShortURL(APIView):
@@ -40,6 +43,11 @@ class UpdateShortURL(APIView):
         cache = RedisCacheService()
 
         cache.delete_pattern(my_urls_cache_pattern(url.owner_id))
+        logger.info(
+            "Short URL updated successfully: user_id=%s, url_id=%s",
+            request.user.id,
+            url.id,
+        )
 
         return Response(serializer.data)
 
