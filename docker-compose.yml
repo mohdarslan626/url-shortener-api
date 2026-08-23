@@ -2,10 +2,14 @@ services:
   web:
     build: .
     container_name: url_shortener_web
+    restart: unless-stopped
+
     ports:
       - "8000:8000"
+
     volumes:
       - .:/app
+
     environment:
       DOCKER_ENV: "1"
       DJANGO_DEBUG: "1"
@@ -29,12 +33,16 @@ services:
   db:
     image: postgres:16
     container_name: url_shortener_db
+    restart: unless-stopped
+
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
     healthcheck:
       test:
         [
@@ -48,8 +56,6 @@ services:
   redis:
     image: redis:7-alpine
     container_name: url_shortener_redis
-    ports:
-      - "6379:6379"
     restart: unless-stopped
 
 volumes:

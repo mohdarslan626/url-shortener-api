@@ -27,12 +27,8 @@ db.sqlite3
 # !*/migrations/__init__.py
 
 # Media files (optional)
-# media/        
 media/
 
 # htmlcov (coverage reports)
 htmlcov/
 .coverage
-
-# .env file for environment variables
-.env
