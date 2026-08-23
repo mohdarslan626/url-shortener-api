@@ -32,3 +32,6 @@ media/
 # htmlcov (coverage reports)
 htmlcov/
 .coverage
+
+# Django static files
+staticfiles/
