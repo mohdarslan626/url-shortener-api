@@ -31,14 +31,26 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv(
-        "DJANGO_ALLOWED_HOSTS",
-        "localhost,127.0.0.1",
-    ).split(",")
-    if host.strip()
-]
+if DEBUG:
+    ALLOWED_HOSTS = [
+        host.strip()
+        for host in os.getenv(
+            "DJANGO_ALLOWED_HOSTS",
+            "localhost,127.0.0.1",
+        ).split(",")
+        if host.strip()
+    ]
+else:
+    ALLOWED_HOSTS = [
+        host.strip()
+        for host in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+        if host.strip()
+    ]
+
+    render_hostname = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+
+    if render_hostname and render_hostname not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(render_hostname)
 
 # Security settings
 

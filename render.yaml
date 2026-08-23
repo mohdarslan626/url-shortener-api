@@ -1,0 +1,79 @@
+services:
+  - type: web
+    name: url-shortener-api
+    runtime: python
+    plan: free
+
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+
+      - key: DJANGO_DEBUG
+        value: "0"
+
+      - key: DB_ENGINE
+        value: "django.db.backends.postgresql"
+
+      - key: DB_NAME
+        fromDatabase:
+          name: url-shortener-db
+          property: database
+
+      - key: DB_USER
+        fromDatabase:
+          name: url-shortener-db
+          property: user
+
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: url-shortener-db
+          property: password
+
+      - key: DB_HOST
+        fromDatabase:
+          name: url-shortener-db
+          property: host
+
+      - key: DB_PORT
+        fromDatabase:
+          name: url-shortener-db
+          property: port
+
+      - key: REDIS_HOST
+        fromService:
+          type: keyvalue
+          name: url-shortener-cache
+          property: host
+
+      - key: REDIS_PORT
+        fromService:
+          type: keyvalue
+          name: url-shortener-cache
+          property: port
+
+      - key: DJANGO_SECURE_SSL_REDIRECT
+        value: "1"
+
+      - key: DJANGO_SESSION_COOKIE_SECURE
+        value: "1"
+
+      - key: DJANGO_CSRF_COOKIE_SECURE
+        value: "1"
+
+      - key: DJANGO_HSTS_SECONDS
+        value: "31536000"
+
+  - type: keyvalue
+    name: url-shortener-cache
+    plan: free
+    ipAllowList: []
+
+databases:
+  - name: url-shortener-db
+    plan: free
+    databaseName: url_shortener
+    user: url_user
