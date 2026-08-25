@@ -36,7 +36,7 @@ def health_check(request):
         {
             "status": "healthy",
             "service": "URL Shortener API",
-            "documentation": "/api/docs/",
+            "documentation": request.build_absolute_uri("/api/docs/"),
         }
     )
 
