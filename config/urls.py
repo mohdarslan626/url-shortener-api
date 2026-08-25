@@ -14,8 +14,10 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
 
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -29,44 +31,49 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
+def health_check(request):
+    return JsonResponse(
+        {
+            "status": "healthy",
+            "service": "URL Shortener API",
+            "documentation": "/api/docs/",
+        }
+    )
+
+
 urlpatterns = [
+    path(
+        "",
+        health_check,
+        name="health-check",
+    ),
     path(
         "admin/",
         admin.site.urls,
     ),
-
     path(
         "api/",
         include("shortener.urls"),
     ),
-
     path(
         "api/auth/",
         include("accounts.urls"),
     ),
-
     path(
         "api/schema/",
         SpectacularAPIView.as_view(),
         name="schema",
     ),
-
     path(
         "api/docs/",
-        SpectacularSwaggerView.as_view(
-            url_name="schema"
-        ),
+        SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
-
     path(
         "api/redoc/",
-        SpectacularRedocView.as_view(
-            url_name="schema"
-        ),
+        SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-
     path(
         "<str:code>/",
         redirect_url,
@@ -80,4 +87,3 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT,
     )
-    
